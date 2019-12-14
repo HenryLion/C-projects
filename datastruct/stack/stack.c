@@ -85,14 +85,16 @@ OP_STATUS push (Stack *stack, void *data, int data_size)
  * function: 出栈
  * author: herbert
  * date: 2019-12-10
+ * modify: 2019-12-14 支持buff为NULL，此时仅将栈顶元素丢弃
  ****************************************************/
 OP_STATUS pop (Stack *stack, void *buff, int data_size)
 {
-	if (NULL == buff)
-		return ERROR;
 	if (!is_empty (stack))
 	{
-		memcpy (buff, stack->node_array[stack->top], data_size);
+		if (NULL != buff)
+		{
+			memcpy (buff, stack->node_array[stack->top], data_size);
+		}
 		free (stack->node_array[stack->top]);
 		stack->node_array[stack->top] = NULL;
 		stack->top -= 1;
