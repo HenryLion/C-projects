@@ -6,14 +6,17 @@
 #include <string.h>
 #include "stack.h"
 
-#define MAZE_SIZE 50
-#define MAZE_BEG_I 1
-#define MAZE_BEG_J 1
 
-#define MAZE_END_I (MAZE_SIZE-2)
-#define MAZE_END_J (MAZE_SIZE-2)
+#define MAZE_SIZE 50 /* 迷宫地图的尺寸 */
 
-#define PATH_NODE_NUM 1000
+#define MAZE_BEG_I 1 /* 起始x坐标 */
+#define MAZE_BEG_J 1 /* 起始y坐标 */
+
+#define MAZE_END_I (MAZE_SIZE-2) /* 终点x坐标 */
+#define MAZE_END_J (MAZE_SIZE-2) /* 终点y坐标 */
+
+#define PATH_NODE_NUM 1000  /* 存储探索路径的数组大小 */
+
 /* 节点之间的方位关系定义 */
 typedef enum dir
 {
@@ -46,8 +49,11 @@ typedef struct maze_node
 	Dir from_dir; // 此节点上一个节点的方位，回溯时上一个节点的方位也按照不通来处理
 } Maze_node;
 
+
+/* global variable defination */
 int maze_map[MAZE_SIZE][MAZE_SIZE] = {0};
 Path_info paths_info = {0};
+
 /****************************************************
  * function: 建立迷宫地图
  * author: herbert
@@ -56,7 +62,7 @@ Path_info paths_info = {0};
 void create_maze_map ()
 {
 	srand (time(NULL));
-	int map_block_num = ( (MAZE_SIZE-1)*(MAZE_SIZE-1)*30 ) / 100; // map中除了墙之外的砖块数其数值取总数的40%
+	int map_block_num = ( (MAZE_SIZE-1)*(MAZE_SIZE-1)*30 ) / 100; // map中除了墙之外的砖块数其数值取总数的30%
 	memset (maze_map, 0, sizeof (maze_map));
 	int i,j;
 	int x, y;
