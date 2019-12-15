@@ -87,7 +87,7 @@ void create_maze_map ()
 
 	// 出入口两个位置不能为砖块
 	maze_map[1][1] = 0;
-	maze_map[MAZE_SIZE-2][MAZE_SIZE-2] = 0;
+	maze_map[MAZE_END_I][MAZE_END_J] = 0;
 }
 
 /****************************************************
@@ -98,6 +98,7 @@ void create_maze_map ()
 void print_map ()
 {
 	int i,j;
+	int num = 0;
 	// 打印列标
 	printf ("   ");
 	for (i = 1; i <= MAZE_SIZE; ++i)
@@ -113,10 +114,14 @@ void print_map ()
 			else if (maze_map[i][j] == 0)
 				printf (". ");
 			else
+			{
+				++num;
 				printf ("@ ");
+			}
 		}
 		printf ("\n");
 	}
+	printf ("stack is: %d\n", num);
 }
 
 /****************************************************
@@ -259,7 +264,7 @@ int solve_maze ()
 			is_node_pop_from_stack = FALSE;
 
 			// 找到出口
-			if ( node.i == (MAZE_SIZE - 2) && node.j == (MAZE_SIZE - 2) )
+			if ( node.i == (MAZE_END_I) && node.j ==  (MAZE_END_J) )
 			{
 				// 将栈中的所有元素对应的map中对应位设置为2
 				while (!is_empty (stack))
@@ -297,8 +302,6 @@ int solve_maze ()
 		}
 	} while (!is_empty (stack));
 }
-
-
 
 int main (void)
 {

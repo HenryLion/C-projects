@@ -4,7 +4,7 @@
 typedef void * Stack_node;
 typedef unsigned char BOOL;
 
-#define INIT_STACK_LEN  1024
+#define INIT_STACK_LEN 4096 
 #define TRUE  1
 #define FALSE 0
 
