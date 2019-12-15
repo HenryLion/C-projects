@@ -24,7 +24,7 @@ typedef struct Stack_t
 Stack* init_stack (Stack **);
 BOOL is_empty (Stack *stack);
 BOOL is_full (Stack *stack);
-OP_STATUS push (Stack *stack, void *data, int data_size);
+OP_STATUS push (Stack *stack, const void *data, int data_size);
 OP_STATUS pop (Stack *stack, void *buff, int data_size);
 OP_STATUS get_top (Stack *stack, void *buff, int data_size);
 void clear_stack (Stack *stack);

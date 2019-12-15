@@ -62,7 +62,7 @@ BOOL is_full (Stack *stack)
  * author: herbert
  * date: 2019-12-10
  ****************************************************/
-OP_STATUS push (Stack *stack, void *data, int data_size)
+OP_STATUS push (Stack *stack, const void *data, int data_size)
 {
 	if (!is_full (stack))
 	{
