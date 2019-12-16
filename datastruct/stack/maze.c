@@ -15,7 +15,7 @@
 #define MAZE_END_I (MAZE_SIZE-2) /* 终点x坐标 */
 #define MAZE_END_J (MAZE_SIZE-2) /* 终点y坐标 */
 
-#define PATH_NODE_NUM 1000  /* 存储探索路径的数组大小 */
+#define PATH_NODE_NUM (MAZE_SIZE*MAZE_SIZE) /* 存储探索路径的数组大小 */
 
 /* 节点之间的方位关系定义 */
 typedef enum dir
@@ -121,7 +121,6 @@ void print_map ()
 		}
 		printf ("\n");
 	}
-	printf ("stack is: %d\n", num);
 }
 
 /****************************************************
