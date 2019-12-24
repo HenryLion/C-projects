@@ -4,6 +4,8 @@
 
 /* 本程序实现字符串匹配算法 */
  
+#define SEARCH_STR_MAX_LEN 128
+
  /*******************************************
   * function: 在串s中查找串t出现的位置
   * date: 2019-12-18
@@ -143,7 +145,70 @@ int optimize_simple_str_match (const char *s, const char *t)
 	return -1;
 }
 
+/*******************************************
+* function: KMP算法求next值
+* date: 2019-12-24
+* common: KMP算法求next值(严蔚敏视频12集)
+******************************************/
+void get_next (const char *t, int *next)
+{
+	if (NULL == t || NULL == next)
+		return ;
+	
+	next[0] = -1;
+	int i = 0;
+	int len_t = strlen(t);
+	int j = -1;
+	while (i < len_t)
+	{
+		if (-1 == j || t[i] == t[j])
+		{
+			++i;
+			++j;
+			next[i] = j;
+		}
+		else
+		{
+			j = next[j];
+		}
+	}
+}
 
+
+/*******************************************
+* function: 在串s中查找串t出现的位置
+* date: 2019-12-24
+* common: KMP算法(严蔚敏视频12集)
+******************************************/
+int kmp_str_match (const char* s, const char* t)
+{
+	int i = 0;
+	int j = 0;
+	int len_s = strlen(s);
+	int len_t = strlen(t);
+	int next[SEARCH_STR_MAX_LEN] = {0};
+
+	if (len_s < len_t || len_s == 0 || len_t == 0)
+		return -1;
+	
+	// 求模式串t的每个字符的next值	
+	get_next (t,next);
+
+	while (i < len_s && j < len_t)
+	{
+		if (j == -1 || s[i] == t[j])
+		{
+			++i;
+			++j;
+		}
+		else
+			j = next[j]; // 如果碰到不能匹配的字符则i不回溯，j回溯到其当前不匹配字符的next值的位置。
+	}
+	if (j == len_t)
+		return i - len_t;
+
+	return -1;
+}
 
 void unit_test ()
 {
@@ -183,6 +248,17 @@ void unit_test ()
 	assert (2 == optimize_simple_str_match ("hello,world", "l"));
 	assert (58 == optimize_simple_str_match ("zhonghuarenmin gonghe guo ,zhongyang renmin zhengfu,zai jintian chegnli le !", "nt"));
 
+	assert (-1 == kmp_str_match ("hello,world", ""));
+	assert (-1 == kmp_str_match ("", "a"));
+	assert (-1 == kmp_str_match ("hello", "hello,"));
+	assert (-1 == kmp_str_match ("", ""));
+	assert (-1 == kmp_str_match ("hello,world", "t"));
+	assert (0 == kmp_str_match ("hello", "hello"));
+	assert (1 == kmp_str_match (";jk,.", "jk,"));
+	assert (5 == kmp_str_match ("hello, world", ", wor"));
+	assert (1 == kmp_str_match ("rld", "ld"));
+	assert (2 == kmp_str_match ("hello,world", "l"));
+	assert (58 == kmp_str_match ("zhonghuarenmin gonghe guo ,zhongyang renmin zhengfu,zai jintian chegnli le !", "nt"));
 	printf ("test OK!\n");
 }
 
