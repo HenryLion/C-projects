@@ -87,7 +87,7 @@ int simple_str_match (const char *s, const char *t)
 /*******************************************
 * function: 在串s中查找串t出现的位置
 * date: 2019-12-18
-* common: 严蔚敏-首位匹配算法,对简单算法的优化,先比较首位字符相等的情况下再依次比较中间字符
+* common: 严蔚敏-首尾尾匹配算法,对简单算法的优化,先比较首尾字符相等的情况下再依次比较中间字符
 ******************************************/
 int optimize_simple_str_match (const char *s, const char *t)
 {
