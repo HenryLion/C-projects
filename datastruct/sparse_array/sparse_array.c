@@ -64,41 +64,7 @@ int is_matrix_node_exist (Sparse_matrix *s_matrix, int r_idx, int c_idx)
 }
 
 /**********************************************
-* function: 初始化一个稀疏矩阵
-* author: Herbert
-* date: 2019-12-26
-**********************************************/
-void init_sparse_matrix_manual (Sparse_matrix *s_matrix)
-{
-	if (NULL == s_matrix)
-		return;
-	int i;
-	int tmp_r_idx, tmp_c_idx;
-	s_matrix->row = ROW;
-	s_matrix->col = COL;
-	s_matrix->node_num = (ROW*COL) / 20; // 假设非零元个数为总数的5%
-	for (i = 0; i < s_matrix->node_num; )
-	{
-		tmp_r_idx = rand () % ROW;
-		tmp_c_idx = rand () % COL;
-
-		// 如果生成的节点坐标已经在之前存在则重新生成
-		if (is_matrix_node_exist (s_matrix, tmp_r_idx, tmp_c_idx) )
-		{
-			continue;
-		}
-
-		s_matrix->nodes[i].r_idx = tmp_r_idx;
-		s_matrix->nodes[i].c_idx = tmp_c_idx;
-		s_matrix->nodes[i].value = rand () % MAX_NODE_VALUE;
-
-		++i;
-	}
-	return;
-}
-
-/**********************************************
-* function: 实现一个普通的矩阵转置运算
+* function: 打印一个稀疏矩阵
 * author: Herbert
 * date: 2019-12-25
 **********************************************/
@@ -158,15 +124,62 @@ void print_two_dimensional_array (int *arr, int row, int col)
 	return ;
 }
 
+/**********************************************
+* function: 初始化一个普通的二维数组(矩阵)
+* author: Herbert
+* date: 2019-12-26
+**********************************************/
+void init_two_dimensional_array (int *arr)
+{
+	if (NULL == arr)
+		return ;
+	int non_zero_num = (ROW*COL) / 20;
+	int i;
+	for (i = 0; i < non_zero_num; ++i)
+	{
+		arr[rand()%(ROW*COL)] = rand () % 100;
+	}
+	return ;
+}
+
+/**********************************************
+* function: 从普通的二维数据表示得到稀疏矩阵的表示
+* author: Herbert
+* date: 2019-12-26
+**********************************************/
+void get_sparse_matrix_from_normal_matrix (int *arr, int row, int col, Sparse_matrix *s_matrix)
+{
+	if (NULL == arr || NULL == s_matrix)
+		return;
+	int i;
+
+	s_matrix->row = row;
+	s_matrix->col = col;
+	int node_num = 0;
+	for (i = 0; i < row * col; ++i)
+	{
+		if (arr[i] != 0)
+		{
+			s_matrix->nodes[node_num].r_idx = i / col;
+			s_matrix->nodes[node_num].c_idx = i % col;
+			s_matrix->nodes[node_num].value = arr[i];
+			++node_num;
+		}
+	}
+	s_matrix->node_num = node_num;
+	return;
+}
+
+
+
 int main (void)
 {
 	srand (time(NULL));
 
 	int arr[ROW*COL] = {0};
 
-	int i,j;
-	for (i = 0; i < ROW*COL; ++i)
-		arr[i] = rand () % 100;
+	init_two_dimensional_array (arr);
+
 	printf ("\nsrc matrix is: \n");	
 	print_two_dimensional_array (arr, ROW, COL);
 	int *transpose_arr = matrix_transpose (arr, ROW, COL);
@@ -175,7 +188,7 @@ int main (void)
 
 	Sparse_matrix *s_matrix = NULL;
 	create_sparse_matrix (&s_matrix);
-	init_sparse_matrix_manual (s_matrix);
+	get_sparse_matrix_from_normal_matrix (arr, ROW, COL, s_matrix);
 	print_sparse_matrix (s_matrix);
 
 	return 0;
