@@ -241,10 +241,6 @@ Sparse_matrix * optimize_sparse_matrix_transpose (Sparse_matrix *s_matrix)
 		col_num[s_matrix->nodes[i].c_idx]++;
 	}
 
-	printf ("col_num: ");
-	for (i = 0; i < s_matrix->col; ++i)
-		printf ("%d ", col_num[i]);
-
 	// 求原矩阵中每列首元素（对应转置矩阵每行首元素）在转置存储结构中的位置
 	int *row_first_pos = (int*)malloc (s_matrix->col * sizeof (int));
 	if (row_first_pos == NULL)
@@ -254,9 +250,6 @@ Sparse_matrix * optimize_sparse_matrix_transpose (Sparse_matrix *s_matrix)
 	{
 		row_first_pos[i] = row_first_pos[i-1] + col_num[i-1];
 	}
-	printf ("row_first_pos: ");
-	for (i = 0; i < s_matrix->col; ++i)
-		printf ("%d ", row_first_pos[i]);
 	
 	// 遍历原矩阵，将每个node放入转置矩阵的对应位置
 	for (i = 0; i < s_matrix->node_num; ++i)
@@ -302,6 +295,7 @@ int main (void)
 	Sparse_matrix *transpos_matrix = sparse_matrix_transpose (s_matrix);
 	print_sparse_matrix (transpos_matrix);
 
+	// 根据严蔚敏方法实现的稀疏矩阵转置运算
 	Sparse_matrix *opti_transpose_matrix = optimize_sparse_matrix_transpose (s_matrix);
 	print_sparse_matrix (opti_transpose_matrix);
 
