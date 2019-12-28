@@ -2,29 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-
-#define ROW 6
-#define COL 10
-#define MAX_NONZERO_NODE_NUM 200  // 按照稀疏矩阵的定义,若有200个非零元则支持的最大总元素个数为200/(5/100) = 4000
-#define MAX_NODE_VALUE 65535
-/* 本程序实现的是稀疏数组的有效表示方法 */
-/* 稀疏矩阵需要考虑到存储空间的节省和计算时间的节约 */
-
-typedef struct matrix_node
-{
-	int r_idx; // 稀疏矩阵非零元的行标
-	int c_idx; // 稀疏矩阵非零元的列标
-	int value; // 稀疏矩阵非零元的值
-} matrix_node_t;
-
-typedef struct sparse_matrix
-{
-	int row;  // 稀疏矩阵行数
-	int col;  // 稀疏矩阵列数
-	int node_num; // 稀疏矩阵非零元个数
-	matrix_node_t nodes[MAX_NONZERO_NODE_NUM]; // 存储非零元节点
-} Sparse_matrix;
-
+#include "sparse_array.h"
 
 /**********************************************
 * function: 生成一个稀疏矩阵
@@ -75,10 +53,13 @@ void print_sparse_matrix (Sparse_matrix *s_matrix)
 	printf ("\nmatrix row = %d, col = %d, node_num = %d:\n", s_matrix->row, s_matrix->col, s_matrix->node_num);
 	for (i = 0; i < s_matrix->node_num; ++i)
 	{
-		printf ("(%d,%d) = %d  ", s_matrix->nodes[i].r_idx, s_matrix->nodes[i].c_idx,s_matrix->nodes[i].value); 
+		printf ("(%d,%d) = %-2d  ", s_matrix->nodes[i].r_idx, s_matrix->nodes[i].c_idx,s_matrix->nodes[i].value); 
 		if ( (i+1) % 6 == 0)
 			printf ("\n");
 	}
+	printf ("\nrow_first_idx :\n");
+	for (i = 0; i < s_matrix->row; ++i)
+		printf ("%d ", s_matrix->row_first[i]);
 	printf ("\n");
 	return;
 }
@@ -151,10 +132,15 @@ void get_sparse_matrix_from_normal_matrix (int *arr, int row, int col, Sparse_ma
 	if (NULL == arr || NULL == s_matrix)
 		return;
 	int i;
-
 	s_matrix->row = row;
 	s_matrix->col = col;
 	int node_num = 0;
+	int last_row_num = -1;
+
+	// 初始化行首元素在s_matrix->nodes中的索引为-1
+	for (i = 0; i < row; ++i)
+		s_matrix->row_first[i] = -1;
+
 	for (i = 0; i < row * col; ++i)
 	{
 		if (arr[i] != 0)
@@ -162,6 +148,12 @@ void get_sparse_matrix_from_normal_matrix (int *arr, int row, int col, Sparse_ma
 			s_matrix->nodes[node_num].r_idx = i / col;
 			s_matrix->nodes[node_num].c_idx = i % col;
 			s_matrix->nodes[node_num].value = arr[i];
+			if (i / col != last_row_num)
+			{
+				//行号发生变化说明是新的一行开始,记录新的一行首元素的nodes索引。
+				s_matrix->row_first[i/col] = node_num;
+				last_row_num = i / col;
+			}
 			++node_num;
 		}
 	}
@@ -267,10 +259,65 @@ Sparse_matrix * optimize_sparse_matrix_transpose (Sparse_matrix *s_matrix)
 }
 
 
+/**********************************************
+* function: 增加接口以用户输入的行列号给用户返回一个指定的稀疏矩阵
+* author: Herbert
+* param: s_matrix: 生成的稀疏矩阵 row: 行数 col:列数
+* date: 2019-12-28
+* comment: 生成节点-> 把节点放入普通存储结构 -> 由普通存储结构转为稀疏矩阵存储结构
+**********************************************/
+Sparse_matrix *get_specific_sparse_matrix (Sparse_matrix **s_matrix, int row, int col)
+{
+	if (NULL == s_matrix) 
+		return NULL;
+	Sparse_matrix *sparse_matrix = NULL;
+	if ( NULL == (sparse_matrix = create_sparse_matrix (s_matrix)) )
+		return NULL;
+	int i = 0;
+	int r_idx,c_idx,value;
+	sparse_matrix->row = row;
+	sparse_matrix->col = col;
+	sparse_matrix->node_num = (row * col) / 10;
+	
+	int *normal_dim_array = (int*)malloc (sizeof (int)*row*col);
+	if (NULL == normal_dim_array)
+		return NULL;
+
+
+	// 生成稀疏矩阵的非零元素
+	while (i < sparse_matrix->node_num)
+	{
+		r_idx = rand () % row;
+		c_idx = rand () % col;
+		value = (rand () % 99) + 1; // 每个节点数值在1 ~ 99
+		if (normal_dim_array[r_idx*col+c_idx] != 0)
+		{
+			//此位置已经生成过元素，则重新生成
+			continue;
+		}
+		else
+		{
+			normal_dim_array[r_idx*col+c_idx] = value;
+			++i;
+		}
+	}
+
+	print_two_dimensional_array (normal_dim_array, row, col);
+
+	// 根据普通矩阵的表达形式生成稀疏矩阵的表达	
+	get_sparse_matrix_from_normal_matrix (normal_dim_array, row, col, sparse_matrix);
+	
+	free (normal_dim_array);
+
+	*s_matrix = sparse_matrix;
+	return *s_matrix;
+}
+
+
 int main (void)
 {
 	srand (time(NULL));
-
+#if 0
 	int arr[ROW*COL] = {0};
 	
 	// 初始化二维数组元素值
@@ -302,5 +349,10 @@ int main (void)
 	free (opti_transpose_matrix);
 	free (transpos_matrix);
 	free (s_matrix);
+#endif
+	Sparse_matrix *sparse_matrix = NULL;
+	get_specific_sparse_matrix (&sparse_matrix, ROW, COL);
+	print_sparse_matrix (sparse_matrix);
+	free (sparse_matrix);
 	return 0;
 }
