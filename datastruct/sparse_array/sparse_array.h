@@ -1,8 +1,8 @@
 #ifndef _SPARSE_ARRAY_H_
 #define _SPARSE_ARRAY_H_
 
-#define ROW 6
-#define COL 10
+#define ROW 5
+#define COL 8
 #define MAX_NONZERO_NODE_NUM 200  // 按照稀疏矩阵的定义,若有200个非零元则支持的最大总元素个数为200/(5/100) = 4000
 #define MAX_NODE_VALUE 65535
 /* 本程序实现的是稀疏数组的有效表示方法 */
