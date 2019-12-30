@@ -161,10 +161,60 @@ int insert_node (Matrix *matrix, matrix_node_t *node)
 	return 0;
 }
 
+void print_linked_matrix_by_row (Matrix *matrix)
+{
+	if (NULL == matrix)
+		return;
+	int i = 0;
+	matrix_node_t *p_node = NULL;
+	for (i = 0; i < MAX_ROW; ++i)
+	{
+		p_node = matrix->row_head[i]->row_next;
+		while (p_node)
+		{
+			printf ("(%d,%d)=%d ", p_node->r_idx, p_node->c_idx, p_node->value);
+			p_node = p_node->row_next;
+		}
+	}
+	printf ("\n");
+	return;
+}
+
+
+void print_linked_matrix_by_col (Matrix *matrix)
+{
+	if (NULL == matrix)
+		return;
+	int i = 0;
+	matrix_node_t *p_node = NULL;
+	for (i = 0; i < MAX_COL; ++i)
+	{
+		p_node = matrix->col_head[i]->col_next;
+		while (p_node)
+		{
+			printf ("(%d,%d)=%d ", p_node->r_idx, p_node->c_idx, p_node->value);
+			p_node = p_node->col_next;
+		}
+	}
+	printf ("\n");
+	return;
+}
+
 int main (void)
 {
 	Matrix *matrix = create_empty_matrix ();
-	matrix_node_t *node = create_node (2,3,5);
-	insert_node (matrix, node);
+	int row, col, value;
+	matrix_node_t *node = NULL;
+	while (1)
+	{
+		printf ("Input: ");
+		scanf ("%d %d %d", &row, &col, &value);
+		if (row >= MAX_ROW || col >= MAX_COL)
+			break;
+		node = create_node (row,col,value);
+		insert_node (matrix, node);
+	}
+	print_linked_matrix_by_row (matrix);
+	print_linked_matrix_by_col (matrix);
 	return 0;
 }
