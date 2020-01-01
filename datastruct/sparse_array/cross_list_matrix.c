@@ -84,6 +84,11 @@ int insert_node (Matrix *matrix, matrix_node_t *node)
 {
 	if (NULL == matrix || NULL == node)
 		return -1;
+	if (node->r_idx >= MAX_ROW || node->c_idx >= MAX_COL)
+	{
+		printf ("insert position error!\n");
+		return -1;
+	}
 	char input;
 	int row = node->r_idx;
 	int col = node->c_idx;
@@ -131,7 +136,11 @@ int insert_node (Matrix *matrix, matrix_node_t *node)
 	matrix_node_t *p_col = matrix->col_head[col];
 	pre = matrix->col_head[col];
 	if (NULL == p_col->col_next)
+	{
 		p_col->col_next = node;
+		matrix->node_num++;
+		printf ("col %d first node insert. \n", col);
+	}
 	else
 	{
 		p_col = p_col->col_next;
@@ -151,22 +160,120 @@ int insert_node (Matrix *matrix, matrix_node_t *node)
 			{
 				node->col_next = p_col;
 				pre->col_next = node;
+				matrix->node_num++;
+				printf ("col %d middle insert.\n", col);
 				break;
 			}
 		}
 		if (!p_col)
+		{
 			pre->col_next = node;
+			matrix->node_num++;
+			printf ("col %d tail insert.\n", col);
+		}
 	}
 
 	return 0;
 }
 
+/***************************************
+* function: 从一个十字链表中删除一个节点(如果存在的话)
+* author: Herbert
+* date: 2020-01-01
+* param: row,col 删除节点的行列坐标
+* comment:
+***************************************/
+int delete_node (Matrix *matrix, int row, int col)
+{
+	if (NULL == matrix)
+		return 0;
+
+	if (row  >= MAX_ROW || col >= MAX_COL)
+	{
+		printf ("delete position error!\n");
+		return -1;
+	}
+
+	// 节点不存在直接返回
+	if (!is_node_exist(matrix, row, col))
+	{
+		printf ("delete node not exist\n");
+		return 0;
+	}
+	
+	// 先删除行指针,只改变指针不释放节点
+	matrix_node_t *p_row = matrix->row_head[row];
+	matrix_node_t *pre = p_row;
+	if (p_row->row_next == NULL)
+	{
+		//never here,节点不存在的情况在前面已经判断过了
+		return 0;
+	}
+	else
+	{
+		p_row = p_row->row_next;
+		while (p_row)
+		{
+			if (p_row->c_idx == col)
+			{
+				pre->row_next = p_row->row_next;
+				break;
+			}
+			else
+			{
+				pre = p_row;
+				p_row = p_row->row_next;
+			}
+		}
+		if (!p_row) // never here 此种情况还是没有找到节点
+			return 0;
+	}
+
+	// 再删除列指针,释放节点空间
+	matrix_node_t *p_col = matrix->col_head[col];
+	pre = p_col;
+	if (p_col->col_next == NULL)
+	{
+		// never here
+		return 0;
+	}
+	else
+	{
+		p_col = p_col->col_next;
+		while (p_col)
+		{
+			if (p_col->r_idx == row)
+			{
+				pre->col_next = p_col->col_next;
+				free (p_col);
+				matrix->node_num--;
+				return 0;
+			}
+			else
+			{
+				pre = p_col;
+				p_col = p_col->col_next;
+			}
+		}
+		if (!p_col)
+			return 0;
+	}
+	return 0;
+}
+
+/***************************************
+* function: 以行序打印一个十字链表
+* author: Herbert
+* date: 2020-01-01
+* comment:
+***************************************/
 void print_linked_matrix_by_row (Matrix *matrix)
 {
 	if (NULL == matrix)
 		return;
 	int i = 0;
 	matrix_node_t *p_node = NULL;
+	printf ("matrix node_num = %d, nodes by row is:\n", matrix->node_num);
 	for (i = 0; i < MAX_ROW; ++i)
 	{
 		p_node = matrix->row_head[i]->row_next;
@@ -180,13 +287,19 @@ void print_linked_matrix_by_row (Matrix *matrix)
 	return;
 }
 
-
+/***************************************
+* function: 以列序打印一个十字链表
+* author: Herbert
+* date: 2020-01-01
+* comment:
+***************************************/
 void print_linked_matrix_by_col (Matrix *matrix)
 {
 	if (NULL == matrix)
 		return;
 	int i = 0;
 	matrix_node_t *p_node = NULL;
+	printf ("matrix node_num = %d, nodes by col is:\n", matrix->node_num);
 	for (i = 0; i < MAX_COL; ++i)
 	{
 		p_node = matrix->col_head[i]->col_next;
@@ -216,5 +329,18 @@ int main (void)
 	}
 	print_linked_matrix_by_row (matrix);
 	print_linked_matrix_by_col (matrix);
+
+	while (1)
+	{
+		printf ("delete: ");
+		scanf ("%d %d", &row, &col);
+		if (row >= MAX_ROW || col >= MAX_COL)
+			break;
+		delete_node (matrix, row, col);
+	}
+
+	print_linked_matrix_by_row (matrix);
+	print_linked_matrix_by_col (matrix);
+
 	return 0;
 }
