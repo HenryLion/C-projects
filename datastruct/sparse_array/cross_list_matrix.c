@@ -86,12 +86,12 @@ int get_node_value (Matrix *matrix, int row, int col)
 {
 	if (NULL == matrix || 0 == matrix->node_num)
 		return 0;
-	matrix_node_t *p = matrix->row_head[row];
+	matrix_node_t *p = matrix->row_head[row]->row_next;
 	while (p)
 	{
-		if (p->row_next->c_idx == col)
+		if (p->c_idx == col)
 		{
-			return p->row_next->value;
+			return p->value;
 		}
 		p = p->row_next;
 	}
@@ -108,12 +108,12 @@ int modify_node_value (Matrix *matrix, int row, int col, int new_value)
 	if (NULL == matrix || 0 == matrix->node_num)
 		return -1;
 
-	matrix_node_t *p = matrix->row_head[row];
+	matrix_node_t *p = matrix->row_head[row]->row_next;
 	while (p)
 	{
-		if (p->row_next->c_idx == col)
+		if (p->c_idx == col)
 		{
-			p->row_next->value = new_value;
+			p->value = new_value;
 			return 0;
 		}
 		p = p->row_next;
