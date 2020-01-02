@@ -29,22 +29,24 @@ matrix_node_t* create_node (int row, int col, int val)
 * date: 2019-12-30
 * comment: 生成一个空的十字链表表示的矩阵并返回它
 ***************************************/
-Matrix *create_empty_matrix ()
+Matrix *create_empty_matrix (int row, int col)
 {
 	Matrix *matrix = (Matrix*)malloc(sizeof(Matrix));
 	if (NULL == matrix)
 		return NULL;
 	memset (matrix, 0, sizeof (Matrix));
 
+	matrix->row_num = row;
+	matrix->col_num = col;
 	// 初始化row_head和col_head数组
 	int i = 0;
-	for (i = 0; i < MAX_ROW; ++i)
+	for (i = 0; i < row; ++i)
 	{
 		matrix->row_head[i] = create_node (-1, -1, INVALID_DATA);
 		if (matrix->row_head[i] == NULL)
 			return NULL;
 	}
-	for (i = 0; i < MAX_COL; ++i)
+	for (i = 0; i < col; ++i)
 	{
 		matrix->col_head[i] = create_node (-1, -1, INVALID_DATA);
 		if (matrix->col_head[i] == NULL)
@@ -63,16 +65,61 @@ BOOL is_node_exist (Matrix *matrix, int row, int col)
 {
 	if (NULL == matrix || 0 == matrix->node_num)
 		return FALSE;
-	matrix_node_t *p = matrix->row_head[row];
+	matrix_node_t *p = matrix->row_head[row]->row_next;
 	while (p)
 	{
-		if (p->row_next->c_idx == col)
+		if (p->c_idx == col)
 			return TRUE;
 		p = p->row_next;
 	}
 	return FALSE;
 }
 
+
+/***************************************
+* function: 获取一个node的值
+* author: Herbert
+* date: 2019-01-02
+* comment:
+***************************************/
+int get_node_value (Matrix *matrix, int row, int col)
+{
+	if (NULL == matrix || 0 == matrix->node_num)
+		return 0;
+	matrix_node_t *p = matrix->row_head[row];
+	while (p)
+	{
+		if (p->row_next->c_idx == col)
+		{
+			return p->row_next->value;
+		}
+		p = p->row_next;
+	}
+	return 0;
+}
+/***************************************
+* function: 获取一个node的值
+* author: Herbert
+* date: 2019-01-02
+* comment:
+***************************************/
+int modify_node_value (Matrix *matrix, int row, int col, int new_value)
+{
+	if (NULL == matrix || 0 == matrix->node_num)
+		return -1;
+
+	matrix_node_t *p = matrix->row_head[row];
+	while (p)
+	{
+		if (p->row_next->c_idx == col)
+		{
+			p->row_next->value = new_value;
+			return 0;
+		}
+		p = p->row_next;
+	}
+	return 0;
+}
 
 /***************************************
 * function: 将一个节点插入十字矩阵
@@ -84,7 +131,7 @@ int insert_node (Matrix *matrix, matrix_node_t *node)
 {
 	if (NULL == matrix || NULL == node)
 		return -1;
-	if (node->r_idx >= MAX_ROW || node->c_idx >= MAX_COL)
+	if (node->r_idx >= matrix->row_num || node->c_idx >= matrix->col_num)
 	{
 		printf ("insert position error!\n");
 		return -1;
@@ -188,7 +235,7 @@ int delete_node (Matrix *matrix, int row, int col)
 	if (NULL == matrix)
 		return 0;
 
-	if (row  >= MAX_ROW || col >= MAX_COL)
+	if (row  >= matrix->row_num || col >= matrix->col_num)
 	{
 		printf ("delete position error!\n");
 		return -1;
@@ -262,6 +309,60 @@ int delete_node (Matrix *matrix, int row, int col)
 }
 
 /***************************************
+* function: 实现矩阵相加
+* author: Herbert
+* date: 2020-01-01
+* comment: 将矩阵B加到矩阵A
+***************************************/
+int matrix_add (Matrix *matrixA, Matrix* matrixB)
+{
+	if (NULL == matrixA)
+		return -1;
+	if (NULL == matrixB)
+		return 0;
+	if (matrixA->row_num != matrixB->row_num || matrixA->col_num != matrixB->col_num)
+		return -1;
+	int i;
+	matrix_node_t *p_node = NULL;
+	int add_val = 0;
+	int a_node_val = 0;
+	matrix_node_t *new_node = NULL;
+	// 遍历B中每一个node做处理
+	for (i = 0; i < matrixB->row_num; ++i)
+	{
+		p_node = matrixB->row_head[i];
+		if (!p_node)
+			continue;
+		else
+		{
+			p_node = p_node->row_next;
+			while (p_node)
+			{
+				if (!is_node_exist (matrixA, p_node->r_idx, p_node->c_idx))
+				{ // 如果A中不存在此节点则创建一个节点插入A
+				    new_node = create_node (p_node->r_idx, p_node->c_idx, p_node->value);
+					insert_node (matrixA, new_node);
+				}
+				else
+				{ // 如果A中已存在此节点则需要判断相加的值是否为0
+					a_node_val = get_node_value (matrixA, p_node->r_idx, p_node->c_idx);
+					add_val = a_node_val + p_node->value;
+					if (add_val)
+					{
+						modify_node_value (matrixA, p_node->r_idx, p_node->c_idx, add_val);	
+					}
+					else
+					{
+						delete_node (matrixA, p_node->r_idx, p_node->c_idx);
+					}
+				}
+				p_node = p_node->row_next;
+			}
+		}
+	}
+	return 0;
+}
+/***************************************
 * function: 以行序打印一个十字链表
 * author: Herbert
 * date: 2020-01-01
@@ -274,7 +375,7 @@ void print_linked_matrix_by_row (Matrix *matrix)
 	int i = 0;
 	matrix_node_t *p_node = NULL;
 	printf ("matrix node_num = %d, nodes by row is:\n", matrix->node_num);
-	for (i = 0; i < MAX_ROW; ++i)
+	for (i = 0; i < matrix->row_num; ++i)
 	{
 		p_node = matrix->row_head[i]->row_next;
 		while (p_node)
@@ -300,7 +401,7 @@ void print_linked_matrix_by_col (Matrix *matrix)
 	int i = 0;
 	matrix_node_t *p_node = NULL;
 	printf ("matrix node_num = %d, nodes by col is:\n", matrix->node_num);
-	for (i = 0; i < MAX_COL; ++i)
+	for (i = 0; i < matrix->col_num; ++i)
 	{
 		p_node = matrix->col_head[i]->col_next;
 		while (p_node)
@@ -315,32 +416,53 @@ void print_linked_matrix_by_col (Matrix *matrix)
 
 int main (void)
 {
-	Matrix *matrix = create_empty_matrix ();
+	// 创建A矩阵并且插入nodes
+	Matrix *matrixA = create_empty_matrix (10, 10);
 	int row, col, value;
 	matrix_node_t *node = NULL;
 	while (1)
 	{
-		printf ("Input: ");
+		printf ("Input A nodes: ");
 		scanf ("%d %d %d", &row, &col, &value);
-		if (row >= MAX_ROW || col >= MAX_COL)
+		if (row >= matrixA->row_num || col >= matrixA->col_num)
 			break;
 		node = create_node (row,col,value);
-		insert_node (matrix, node);
+		insert_node (matrixA, node);
 	}
-	print_linked_matrix_by_row (matrix);
-	print_linked_matrix_by_col (matrix);
+	print_linked_matrix_by_row (matrixA);
+	print_linked_matrix_by_col (matrixA);
 
+	// 创建B矩阵并插入nodes
+	Matrix *matrixB = create_empty_matrix (10, 10);
 	while (1)
 	{
-		printf ("delete: ");
-		scanf ("%d %d", &row, &col);
-		if (row >= MAX_ROW || col >= MAX_COL)
+		printf ("Input B nodes: ");
+		scanf ("%d %d %d", &row, &col, &value);
+		if (row >= matrixB->row_num || col >= matrixB->col_num)
 			break;
-		delete_node (matrix, row, col);
+		node = create_node (row,col,value);
+		insert_node (matrixB, node);
+	}
+	print_linked_matrix_by_row (matrixB);
+	print_linked_matrix_by_col (matrixB);
+
+	// 矩阵A+B
+	matrix_add (matrixA, matrixB);
+	print_linked_matrix_by_row (matrixA);
+	print_linked_matrix_by_col (matrixA);
+
+	// 从A中删除一些节点
+	while (1)
+	{
+		printf ("delete A nodes: ");
+		scanf ("%d %d", &row, &col);
+		if (row >= matrixA->row_num || col >= matrixA->col_num)
+			break;
+		delete_node (matrixA, row, col);
 	}
 
-	print_linked_matrix_by_row (matrix);
-	print_linked_matrix_by_col (matrix);
+	print_linked_matrix_by_row (matrixA);
+	print_linked_matrix_by_col (matrixA);
 
 	return 0;
 }

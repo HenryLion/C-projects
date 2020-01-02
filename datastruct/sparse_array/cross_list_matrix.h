@@ -21,6 +21,8 @@ typedef struct matrix_node
 typedef struct matrix
 {
 	int node_num;
+	int row_num;
+	int col_num;
 	matrix_node_t *row_head[MAX_ROW];
 	matrix_node_t *col_head[MAX_COL];
 } Matrix;
