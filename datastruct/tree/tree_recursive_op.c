@@ -168,4 +168,6 @@ int create_binary_tree_by_post (BiTree **T)
 }
 
 
-
+/* 7、根据前序和中序序列构建二叉树 */
+// pre: A B I D E F G C H J
+// mid: I B F E D G A J H C
