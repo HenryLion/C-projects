@@ -55,10 +55,47 @@ int pre_traverse_binary_tree (BiTree root)
 	return 0;
 }
 
+/****************************************************
+* function: 中序遍历二叉树
+* author: Herbert
+* date: 2020-01-11
+* comment:  
+****************************************************/
+int inter_traverse_binary_tree (BiTree root)
+{
+	if (!root)
+		return 0;
+	inter_traverse_binary_tree (root->l_node);
+	printf ("%d ", root->data);
+	inter_traverse_binary_tree (root->r_node);
+	return 0;
+}
+/****************************************************
+* function: 后序遍历二叉树
+* author: Herbert
+* date: 2020-01-11
+* comment:  
+****************************************************/
+int post_traverse_binary_tree (BiTree root)
+{
+	if (!root)
+		return 0;
+	post_traverse_binary_tree (root->l_node);
+	post_traverse_binary_tree (root->r_node);
+	printf ("%d ", root->data);
+
+	return 0;
+}
+
 int main (void)
 {
 	BiTree tree = NULL;
 	tree = create_binary_tree_by_pre (&tree);
 	pre_traverse_binary_tree (tree);
+	printf ("\n");
+	inter_traverse_binary_tree (tree);
+	printf ("\n");
+	post_traverse_binary_tree (tree);
+	printf ("\n");
 	return 0;
 }
