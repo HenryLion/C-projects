@@ -148,7 +148,7 @@ BiTreeNode * go_far_left_node (BiTree T)
 		return NULL;
 	while (T->l_node)
 	{
-		push (T);
+		push (T); //如果左子树不为空，则将节点入栈
 		T = T->l_node;
 	}
 	return T;
@@ -180,18 +180,95 @@ int inter_traverse_binary_tree_nonrecusive (BiTree root)
 	return 0;
 }
 
+// 求叶子节点个数 先序
+void get_leaf_num (BiTree root, int *leaf_num)
+{
+	if (NULL == root)
+		return;
+	if (!root->l_node && !root->r_node)
+		(*leaf_num)++;
+	get_leaf_num (root->l_node, leaf_num);
+	get_leaf_num (root->r_node, leaf_num);
+	return;
+}
+
+// 求二叉树的深度 后序
+int get_tree_depth (BiTree root)
+{
+	if (NULL == root)
+		return 0;
+	int left_depth = 0;
+	int rigth_depth = 0;
+	int depth = 0;
+	left_depth = get_tree_depth (root->l_node);
+	rigth_depth = get_tree_depth (root->r_node);
+	depth = 1 + (left_depth > rigth_depth ? left_depth:rigth_depth);
+	return depth;
+}
+
+// 生成一个二叉树节点
+BiTreeNode * create_tree_node (int data, BiTreeNode *l_node, BiTreeNode *r_node)
+{
+	BiTreeNode *new_node = (BiTreeNode*)malloc (sizeof (BiTreeNode));
+	if (NULL == new_node)
+		exit (1);
+	
+	new_node->data = data;
+	new_node->l_node = l_node;
+	new_node->r_node = r_node;
+
+	return new_node;
+}
+
+// 复制二叉树 后序
+BiTreeNode *copy_binary_tree (BiTree root)
+{
+	if (NULL == root)
+		return NULL;
+
+	BiTreeNode *new_node = (BiTreeNode*)malloc (sizeof (BiTreeNode));
+	if (NULL == new_node)
+		exit (1);
+	
+	new_node->data = root->data;
+	new_node->l_node = copy_binary_tree (root->l_node);
+	new_node->r_node = copy_binary_tree (root->r_node);
+	return new_node;
+}
 
 int main (void)
 {
 	BiTree tree = NULL;
+	// 根据输入序列生产二叉树 需要用0来表示空树
 	tree = create_binary_tree_by_pre (&tree);
+	// 打印出建立二叉树的先序序列
 	pre_traverse_binary_tree (tree);
 	printf ("\n");
+
+	// 中序遍历
 	inter_traverse_binary_tree (tree);
 	printf ("\n");
+
+	// 后序遍历
 	post_traverse_binary_tree (tree);
 	printf ("\n");
+
+	// 非递归方式中序遍历
 	inter_traverse_binary_tree_nonrecusive (tree);
 	printf ("\n");
+	int leaf_num = 0;
+
+	// 求二叉树叶子节点个数
+	get_leaf_num (tree, &leaf_num);
+	printf ("tree leaf num is: %d\n", leaf_num);
+
+	// 求二叉树深度
+	printf ("tree depth is: %d\n", get_tree_depth(tree));
+
+	// 复制二叉树
+	BiTreeNode *cp_tree = copy_binary_tree (tree);
+	// 中序遍历复制的二叉树
+	inter_traverse_binary_tree (cp_tree);
 	return 0;
+
 }
