@@ -61,12 +61,16 @@ BiTreeNode* pop ()
 * author: Herbert
 * date: 2020-01-10
 * comment: eg: 12300045000   0表示空树
+        1
+	   / \
+	  2   4
+	 /   /  
+	3   5
 ****************************************************/
 BiTree create_binary_tree_by_pre (BiTree *T)
 {
 	int ch;
 	scanf ("%d", &ch);
-	//scanf ("%*[^\n]%*c");
 	if (ch != 0)
 	{
 		*T = (BiTree)malloc (sizeof(BiTreeNode));
@@ -83,7 +87,7 @@ BiTree create_binary_tree_by_pre (BiTree *T)
 	return *T;
 }
 
-
+ 
 /****************************************************
 * function: 先序遍历二叉树
 * author: Herbert
